@@ -47,11 +47,11 @@ solana-frozen-abi-macro = { workspace = true, features = ["frozen-abi"], optiona
 solana-program-error = { workspace = true, optional = true }
 solana-sanitize = { workspace = true, optional = true }
 
-[target.'cfg(not(target_os = "solana"))'.dependencies]
+[target.'cfg(not(any(target_os = "solana", target_os = "zkvm")))'.dependencies]
 curve25519-dalek = { workspace = true, optional = true }
 solana-sha256-hasher = { workspace = true, features = ["sha2"], optional = true }
 
-[target.'cfg(target_os = "solana")'.dependencies]
+[target.'cfg(any(target_os = "solana", target_os = "zkvm"))'.dependencies]
 solana-define-syscall = { workspace = true, optional = true }
 solana-sha256-hasher = { workspace = true, optional = true }
 

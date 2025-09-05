@@ -1,10 +1,10 @@
-#[cfg(all(not(target_os = "solana"), feature = "std"))]
+#[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "std"))]
 use crate::pubkey::NEG_G1_GENERATOR_AFFINE;
 #[cfg(not(feature = "std"))]
 use blstrs::G1Projective;
 #[cfg(feature = "bytemuck")]
 use bytemuck::{Pod, PodInOption, Zeroable, ZeroableInOption};
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 use {
     crate::{
         error::BlsError,
@@ -15,7 +15,7 @@ use {
     group::Group,
     pairing::{MillerLoopResult, MultiMillerLoop},
 };
-#[cfg(all(feature = "parallel", not(target_os = "solana")))]
+#[cfg(all(feature = "parallel", not(any(target_os = "solana", target_os = "zkvm"))))]
 use {alloc::vec::Vec, rayon::prelude::*};
 use {
     base64::{prelude::BASE64_STANDARD, Engine},
@@ -40,21 +40,21 @@ pub const BLS_SIGNATURE_AFFINE_SIZE: usize = 192;
 pub const BLS_SIGNATURE_AFFINE_BASE64_SIZE: usize = 256;
 
 /// A trait for types that can be converted into a `SignatureProjective`.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsSignatureProjective {
     /// Attempt to convert the type into a `SignatureProjective`.
     fn try_as_projective(&self) -> Result<SignatureProjective, BlsError>;
 }
 
 /// A trait for types that can be converted into a `Signature` (affine).
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsSignature {
     /// Attempt to convert the type into a `Signature`.
     fn try_as_affine(&self) -> Result<Signature, BlsError>;
 }
 
 /// A trait that provides verification methods to any convertible signature type.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait VerifiableSignature: AsSignatureProjective {
     /// Verify the signature against any convertible public key type and a message.
     fn verify<P: VerifiablePubkey>(&self, pubkey: &P, message: &[u8]) -> Result<bool, BlsError> {
@@ -65,11 +65,11 @@ pub trait VerifiableSignature: AsSignatureProjective {
 }
 
 /// A BLS signature in a projective point representation
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SignatureProjective(pub(crate) G2Projective);
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl SignatureProjective {
     /// Creates the identity element, which is the starting point for aggregation
     ///
@@ -328,10 +328,10 @@ impl SignatureProjective {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<T: AsSignatureProjective> VerifiableSignature for T {}
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl_bls_conversions!(
     SignatureProjective,
     Signature,

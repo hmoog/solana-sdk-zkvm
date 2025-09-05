@@ -86,7 +86,7 @@ impl Secp256k1Pubkey {
     }
 }
 
-#[cfg(target_os = "solana")]
+#[cfg(any(target_os = "solana", target_os = "zkvm"))]
 pub use solana_define_syscall::definitions::sol_secp256k1_recover;
 
 /// Recover the public key from a [secp256k1] ECDSA signature and
@@ -406,7 +406,7 @@ pub fn secp256k1_recover(
     recovery_id: u8,
     signature: &[u8],
 ) -> Result<Secp256k1Pubkey, Secp256k1RecoverError> {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         let mut pubkey_buffer = [0u8; SECP256K1_PUBLIC_KEY_LENGTH];
         let result = unsafe {
@@ -424,7 +424,7 @@ pub fn secp256k1_recover(
         }
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     {
         const HASH_SIZE: usize = 32;
         if hash.len() != HASH_SIZE {

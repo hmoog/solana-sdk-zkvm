@@ -5,7 +5,7 @@ extern crate alloc;
 
 #[cfg(feature = "std")]
 extern crate std;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub use crate::{
     error::BlsError,
     keypair::Keypair,
@@ -30,14 +30,14 @@ pub use crate::{
 };
 
 pub mod error;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub mod keypair;
 #[macro_use]
 pub(crate) mod macros;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub mod hash;
 pub mod proof_of_possession;
 pub mod pubkey;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub mod secret_key;
 pub mod signature;

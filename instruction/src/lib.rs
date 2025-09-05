@@ -23,7 +23,7 @@ pub mod account_meta;
 #[cfg(feature = "std")]
 pub use account_meta::AccountMeta;
 pub use solana_instruction_error as error;
-#[cfg(any(feature = "syscalls", target_os = "solana"))]
+#[cfg(any(feature = "syscalls", any(target_os = "solana", target_os = "zkvm")))]
 pub mod syscalls;
 
 /// A directive for a single invocation of a Solana program.

@@ -1,6 +1,6 @@
 #[cfg(feature = "bytemuck")]
 use bytemuck::{Pod, PodInOption, Zeroable, ZeroableInOption};
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 use {
     crate::{error::BlsError, pubkey::VerifiablePubkey},
     blstrs::{G2Affine, G2Projective},
@@ -33,21 +33,21 @@ pub const BLS_PROOF_OF_POSSESSION_AFFINE_SIZE: usize = 192;
 pub const BLS_PROOF_OF_POSSESSION_AFFINE_BASE64_SIZE: usize = 256;
 
 /// A trait for types that can be converted into a `ProofOfPossessionProjective`.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsProofOfPossessionProjective {
     /// Attempt to convert the type into a `ProofOfPossessionProjective`.
     fn try_as_projective(&self) -> Result<ProofOfPossessionProjective, BlsError>;
 }
 
 /// A trait for types that can be converted into a `ProofOfPossession` (affine).
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsProofOfPossession {
     /// Attempt to convert the type into a `ProofOfPossession`.
     fn try_as_affine(&self) -> Result<ProofOfPossession, BlsError>;
 }
 
 /// A trait that provides verification methods to any convertible proof of possession type.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait VerifiableProofOfPossession: AsProofOfPossessionProjective {
     /// Verifies the proof of possession against any convertible public key type.
     fn verify<P: VerifiablePubkey>(&self, pubkey: &P) -> Result<bool, BlsError> {
@@ -57,14 +57,14 @@ pub trait VerifiableProofOfPossession: AsProofOfPossessionProjective {
 }
 
 /// A BLS proof of possession in a projective point representation
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ProofOfPossessionProjective(pub(crate) G2Projective);
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<T: AsProofOfPossessionProjective> VerifiableProofOfPossession for T {}
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl_bls_conversions!(
     ProofOfPossessionProjective,
     ProofOfPossession,

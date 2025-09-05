@@ -4,17 +4,17 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![no_std]
 
-#[cfg(all(feature = "sha3", not(target_os = "solana")))]
+#[cfg(all(feature = "sha3", not(any(target_os = "solana", target_os = "zkvm"))))]
 use sha3::{Digest, Keccak256};
 pub use solana_hash::{Hash, ParseHashError, HASH_BYTES, MAX_BASE58_LEN};
 
 #[derive(Clone, Default)]
-#[cfg(all(feature = "sha3", not(target_os = "solana")))]
+#[cfg(all(feature = "sha3", not(any(target_os = "solana", target_os = "zkvm"))))]
 pub struct Hasher {
     hasher: Keccak256,
 }
 
-#[cfg(all(feature = "sha3", not(target_os = "solana")))]
+#[cfg(all(feature = "sha3", not(any(target_os = "solana", target_os = "zkvm"))))]
 impl Hasher {
     pub fn hash(&mut self, val: &[u8]) {
         self.hasher.update(val);
@@ -33,7 +33,7 @@ impl Hasher {
 pub fn hashv(vals: &[&[u8]]) -> Hash {
     // Perform the calculation inline, calling this from within a program is
     // not supported
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     {
         #[cfg(feature = "sha3")]
         {
@@ -48,7 +48,7 @@ pub fn hashv(vals: &[&[u8]]) -> Hash {
         }
     }
     // Call via a system call to perform the calculation
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         let mut hash_result = [0; HASH_BYTES];
         unsafe {

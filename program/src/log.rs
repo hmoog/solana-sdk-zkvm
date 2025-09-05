@@ -39,23 +39,23 @@ pub use solana_msg::{msg, sol_log};
 /// Print 64-bit values represented as hexadecimal to the log.
 #[inline]
 pub fn sol_log_64(arg1: u64, arg2: u64, arg3: u64, arg4: u64, arg5: u64) {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     unsafe {
         crate::syscalls::sol_log_64_(arg1, arg2, arg3, arg4, arg5);
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_log_64(arg1, arg2, arg3, arg4, arg5);
 }
 
 /// Print some slices as base64.
 pub fn sol_log_data(data: &[&[u8]]) {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     unsafe {
         crate::syscalls::sol_log_data(data as *const _ as *const u8, data.len() as u64)
     };
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_log_data(data);
 }
 
@@ -92,10 +92,10 @@ pub fn sol_log_params(accounts: &[AccountInfo], data: &[u8]) {
 /// Print the remaining compute units available to the program.
 #[inline]
 pub fn sol_log_compute_units() {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     unsafe {
         crate::syscalls::sol_log_compute_units_();
     }
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_log_compute_units();
 }

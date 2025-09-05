@@ -7,12 +7,12 @@
 use solana_pubkey::Pubkey;
 
 fn get_epoch_stake(var_addr: *const u8) -> u64 {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         unsafe { solana_define_syscall::definitions::sol_get_epoch_stake(var_addr) }
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     {
         core::hint::black_box(var_addr);
         0

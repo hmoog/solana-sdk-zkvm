@@ -417,7 +417,7 @@ impl<
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<
         T: Clone + std::cmp::Eq + std::hash::Hash + AbiExample,
         S: Clone + AbiExample,
@@ -475,21 +475,21 @@ impl<T: std::cmp::Ord + AbiExample> AbiExample for BTreeSet<T> {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl AbiExample for memmap2::MmapMut {
     fn example() -> Self {
         memmap2::MmapMut::map_anon(1).expect("failed to map the data file")
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl AbiExample for std::path::PathBuf {
     fn example() -> Self {
         std::path::PathBuf::from(String::example())
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl AbiExample for std::time::SystemTime {
     fn example() -> Self {
         std::time::SystemTime::UNIX_EPOCH
@@ -613,14 +613,14 @@ impl<O: AbiEnumVisitor, E: AbiEnumVisitor> AbiEnumVisitor for Result<O, E> {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<T: AbiExample> AbiExample for std::sync::OnceLock<T> {
     fn example() -> Self {
         Self::from(T::example())
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<
         T: std::cmp::Eq + std::hash::Hash + AbiExample,
         S: AbiExample,
@@ -635,7 +635,7 @@ impl<
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<T: AbiExample> AbiExample for boxcar::Vec<T> {
     fn example() -> Self {
         info!("AbiExample for (boxcar::Vec): {}", type_name::<Self>());

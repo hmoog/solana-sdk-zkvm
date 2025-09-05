@@ -235,7 +235,7 @@ impl From<SanitizeError> for TransactionError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<SanitizeMessageError> for TransactionError {
     fn from(err: SanitizeMessageError) -> Self {
         match err {
@@ -245,7 +245,7 @@ impl From<SanitizeMessageError> for TransactionError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AddressLoaderError {
     /// Address loading from lookup tables is disabled
@@ -267,10 +267,10 @@ pub enum AddressLoaderError {
     InvalidLookupIndex,
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl core::error::Error for AddressLoaderError {}
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl fmt::Display for AddressLoaderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -290,7 +290,7 @@ impl fmt::Display for AddressLoaderError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<AddressLoaderError> for TransactionError {
     fn from(err: AddressLoaderError) -> Self {
         match err {
@@ -304,7 +304,7 @@ impl From<AddressLoaderError> for TransactionError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(PartialEq, Debug, Eq, Clone)]
 pub enum SanitizeMessageError {
     IndexOutOfBounds,
@@ -313,7 +313,7 @@ pub enum SanitizeMessageError {
     AddressLoaderError(AddressLoaderError),
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl core::error::Error for SanitizeMessageError {
     fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         match self {
@@ -325,7 +325,7 @@ impl core::error::Error for SanitizeMessageError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl fmt::Display for SanitizeMessageError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -338,14 +338,14 @@ impl fmt::Display for SanitizeMessageError {
         }
     }
 }
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<AddressLoaderError> for SanitizeMessageError {
     fn from(source: AddressLoaderError) -> Self {
         SanitizeMessageError::AddressLoaderError(source)
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<SanitizeError> for SanitizeMessageError {
     fn from(err: SanitizeError) -> Self {
         match err {
@@ -356,7 +356,7 @@ impl From<SanitizeError> for SanitizeMessageError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(Debug)]
 pub enum TransportError {
     IoError(std::io::Error),
@@ -364,7 +364,7 @@ pub enum TransportError {
     Custom(String),
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl core::error::Error for TransportError {
     fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         match self {
@@ -375,7 +375,7 @@ impl core::error::Error for TransportError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl fmt::Display for TransportError {
     fn fmt(&self, f: &mut fmt::Formatter) -> ::core::fmt::Result {
         match self {
@@ -388,21 +388,21 @@ impl fmt::Display for TransportError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<std::io::Error> for TransportError {
     fn from(e: std::io::Error) -> Self {
         TransportError::IoError(e)
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<TransactionError> for TransportError {
     fn from(e: TransactionError) -> Self {
         TransportError::TransactionError(e)
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl TransportError {
     pub fn unwrap(&self) -> TransactionError {
         if let TransportError::TransactionError(err) = self {
@@ -413,5 +413,5 @@ impl TransportError {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub type TransportResult<T> = std::result::Result<T, TransportError>;

@@ -46,7 +46,7 @@ solana-pubkey = { workspace = true }
 solana-sdk-ids = { workspace = true }
 solana-slot-hashes = { workspace = true }
 
-[target.'cfg(not(target_os = "solana"))'.dependencies]
+[target.'cfg(not(any(target_os = "solana", target_os = "zkvm")))'.dependencies]
 solana-pubkey = { workspace = true, features = ["curve25519"] }
 
 [dev-dependencies]

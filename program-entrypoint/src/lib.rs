@@ -219,7 +219,7 @@ macro_rules! entrypoint_no_alloc {
 #[macro_export]
 macro_rules! custom_heap_default {
     () => {
-        #[cfg(all(not(feature = "custom-heap"), target_os = "solana"))]
+        #[cfg(all(not(feature = "custom-heap"), any(target_os = "solana", target_os = "zkvm")))]
         #[global_allocator]
         static A: $crate::BumpAllocator = unsafe {
             $crate::BumpAllocator::with_fixed_address_range(
@@ -266,7 +266,7 @@ macro_rules! custom_heap_default {
 /// with the `#[no_mangle]` attribute, as below:
 ///
 /// ```ignore
-/// #[cfg(all(feature = "custom-panic", target_os = "solana"))]
+/// #[cfg(all(feature = "custom-panic", any(target_os = "solana", target_os = "zkvm")))]
 /// #[no_mangle]
 /// fn custom_panic(info: &core::panic::PanicInfo<'_>) {
 ///     $crate::msg!("{}", info);
@@ -275,7 +275,7 @@ macro_rules! custom_heap_default {
 #[macro_export]
 macro_rules! custom_panic_default {
     () => {
-        #[cfg(all(not(feature = "custom-panic"), target_os = "solana"))]
+        #[cfg(all(not(feature = "custom-panic"), any(target_os = "solana", target_os = "zkvm")))]
         #[no_mangle]
         fn custom_panic(info: &core::panic::PanicInfo<'_>) {
             if let Some(mm) = info.message().as_str() {

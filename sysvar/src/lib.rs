@@ -79,7 +79,7 @@
 
 // hidden re-exports to make macros work
 pub mod __private {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     pub use solana_define_syscall::definitions;
     pub use {solana_program_entrypoint::SUCCESS, solana_program_error::ProgramError};
 }
@@ -166,10 +166,10 @@ macro_rules! impl_sysvar_get {
             let mut var = Self::default();
             let var_addr = &mut var as *mut _ as *mut u8;
 
-            #[cfg(target_os = "solana")]
+            #[cfg(any(target_os = "solana", target_os = "zkvm"))]
             let result = unsafe { $crate::__private::definitions::$syscall_name(var_addr) };
 
-            #[cfg(not(target_os = "solana"))]
+            #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
             let result = $crate::program_stubs::$syscall_name(var_addr);
 
             match result {
@@ -198,12 +198,12 @@ pub fn get_sysvar(
     let sysvar_id = sysvar_id as *const _ as *const u8;
     let var_addr = dst as *mut _ as *mut u8;
 
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     let result = unsafe {
         solana_define_syscall::definitions::sol_get_sysvar(sysvar_id, var_addr, offset, length)
     };
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     let result = crate::program_stubs::sol_get_sysvar(sysvar_id, var_addr, offset, length);
 
     match result {

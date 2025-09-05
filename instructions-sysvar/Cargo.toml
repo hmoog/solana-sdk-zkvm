@@ -29,7 +29,7 @@ solana-sdk-ids = { workspace = true }
 solana-serialize-utils = { workspace = true }
 solana-sysvar-id = { workspace = true }
 
-[target.'cfg(not(target_os = "solana"))'.dependencies]
+[target.'cfg(not(any(target_os = "solana", target_os = "zkvm")))'.dependencies]
 bitflags = { workspace = true }
 
 [lints]

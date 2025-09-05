@@ -1,10 +1,10 @@
 #[cfg(feature = "bytemuck")]
 use bytemuck::{Pod, PodInOption, Zeroable, ZeroableInOption};
-#[cfg(all(feature = "parallel", not(target_os = "solana")))]
+#[cfg(all(feature = "parallel", not(any(target_os = "solana", target_os = "zkvm"))))]
 use rayon::prelude::*;
-#[cfg(all(not(target_os = "solana"), feature = "std"))]
+#[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "std"))]
 use std::sync::LazyLock;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 use {
     crate::{
         error::BlsError,
@@ -39,26 +39,26 @@ pub const BLS_PUBLIC_KEY_AFFINE_SIZE: usize = 96;
 /// Size of a BLS public key in an affine point representation in base64
 pub const BLS_PUBLIC_KEY_AFFINE_BASE64_SIZE: usize = 256;
 
-#[cfg(all(not(target_os = "solana"), feature = "std"))]
+#[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "std"))]
 pub(crate) static NEG_G1_GENERATOR_AFFINE: LazyLock<G1Affine> =
     LazyLock::new(|| (-G1Projective::generator()).into());
 
 /// A trait for types that can be converted into a `PubkeyProjective`.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsPubkeyProjective {
     /// Attempt to convert the type into a `PubkeyProjective`.
     fn try_as_projective(&self) -> Result<PubkeyProjective, BlsError>;
 }
 
 /// A trait for types that can be converted into a `Pubkey` (affine).
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait AsPubkey {
     /// Attempt to convert the type into a `Pubkey`.
     fn try_as_affine(&self) -> Result<Pubkey, BlsError>;
 }
 
 /// A trait that provides verification methods to any convertible public key type.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub trait VerifiablePubkey: AsPubkey {
     /// Uses this public key to verify any convertible signature type.
     fn verify_signature<S: AsSignature>(
@@ -83,11 +83,11 @@ pub trait VerifiablePubkey: AsPubkey {
 }
 
 /// A BLS public key in a projective point representation
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PubkeyProjective(pub(crate) G1Projective);
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl PubkeyProjective {
     /// Creates the identity element, which is the starting point for aggregation
     ///
@@ -171,10 +171,10 @@ impl PubkeyProjective {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl<T: AsPubkey> VerifiablePubkey for T {}
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl_bls_conversions!(
     PubkeyProjective,
     Pubkey,
@@ -184,7 +184,7 @@ impl_bls_conversions!(
     AsPubkey
 );
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl TryFrom<&[u8]> for PubkeyProjective {
     type Error = BlsError;
     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
@@ -198,7 +198,7 @@ impl TryFrom<&[u8]> for PubkeyProjective {
     }
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl From<&PubkeyProjective> for [u8; BLS_PUBLIC_KEY_AFFINE_SIZE] {
     fn from(pubkey: &PubkeyProjective) -> Self {
         let pubkey_affine: Pubkey = (*pubkey).into();
@@ -249,7 +249,7 @@ pub struct Pubkey(
     pub  [u8; BLS_PUBLIC_KEY_AFFINE_SIZE],
 );
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 impl Pubkey {
     /// Verify a signature and a message against a public key
     pub(crate) fn _verify_signature(&self, signature: &Signature, message: &[u8]) -> bool {
