@@ -42,6 +42,21 @@ pub const HEAP_LENGTH: usize = 32 * 1024;
 /// Value used to indicate that a serialized account is not a duplicate
 pub const NON_DUP_MARKER: u8 = u8::MAX;
 
+#[cfg(target_os = "zkvm")]
+pub mod zkvm {
+    pub mod sp1 {
+        pub use sp1_zkvm::*;
+    }
+
+    pub mod pubkey {
+        pub use solana_pubkey::*;
+    }
+
+    pub mod account_info {
+        pub use solana_account_info::*;
+    }
+}
+
 /// Declare the program entrypoint and set up global handlers.
 ///
 /// This macro emits the common boilerplate necessary to begin program
@@ -127,6 +142,7 @@ macro_rules! entrypoint {
     ($process_instruction:ident) => {
         /// # Safety
         #[no_mangle]
+        #[cfg(not(target_os = "zkvm"))]
         pub unsafe extern "C" fn entrypoint(input: *mut u8) -> u64 {
             let (program_id, accounts, instruction_data) = unsafe { $crate::deserialize(input) };
             match $process_instruction(program_id, &accounts, instruction_data) {
@@ -134,8 +150,102 @@ macro_rules! entrypoint {
                 Err(error) => error.into(),
             }
         }
+        #[cfg(not(target_os = "zkvm"))]
         $crate::custom_heap_default!();
+        #[cfg(not(target_os = "zkvm"))]
         $crate::custom_panic_default!();
+
+        #[cfg(target_os = "zkvm")]
+        $crate::zkvm::sp1::entrypoint!(zkvm_glue);
+        #[cfg(target_os = "zkvm")]
+        pub fn zkvm_glue() {
+            // ---- number of accounts ----
+            let acct_count = $crate::zkvm::sp1::io::read::<u64>() as usize;
+
+            // First pass: stable backing memory
+            let mut account_keys: Vec<$crate::zkvm::pubkey::Pubkey> = Vec::with_capacity(acct_count);
+            let mut account_owners: Vec<$crate::zkvm::pubkey::Pubkey> =
+                Vec::with_capacity(acct_count);
+
+            let mut is_signer_flags: Vec<bool> = Vec::with_capacity(acct_count);
+            let mut is_writable_flags: Vec<bool> = Vec::with_capacity(acct_count);
+            let mut is_exec_flags: Vec<bool> = Vec::with_capacity(acct_count);
+
+            let mut lamports_boxes: Vec<Box<u64>> = Vec::with_capacity(acct_count);
+            let mut data_boxes: Vec<Box<[u8]>> = Vec::with_capacity(acct_count);
+
+            for _ in 0..acct_count {
+                // duplicate flag + padding (8 bytes total)
+                let _dup_and_pad: [u8; 8] = $crate::zkvm::sp1::io::read();
+
+                // flags + 4 bytes padding (5 total); only the first byte matters
+                let flags_with_pad: [u8; 5] = $crate::zkvm::sp1::io::read();
+                let flags = flags_with_pad[0];
+                is_signer_flags.push((flags & 0b100) != 0);
+                is_writable_flags.push((flags & 0b010) != 0);
+                is_exec_flags.push((flags & 0b001) != 0);
+
+                // pubkey
+                let key_bytes: [u8; 32] = $crate::zkvm::sp1::io::read();
+                account_keys.push($crate::zkvm::pubkey::Pubkey::new_from_array(key_bytes));
+
+                // owner
+                let owner_bytes: [u8; 32] = $crate::zkvm::sp1::io::read();
+                account_owners.push($crate::zkvm::pubkey::Pubkey::new_from_array(owner_bytes));
+
+                // lamports
+                let lamports_val: u64 = $crate::zkvm::sp1::io::read();
+                lamports_boxes.push(Box::new(lamports_val));
+
+                // data_len then data bytes as a single chunk
+                let data_len: usize = $crate::zkvm::sp1::io::read::<u64>() as usize;
+                let data_vec: Vec<u8> = $crate::zkvm::sp1::io::read_vec();
+                assert_eq!(data_vec.len(), data_len, "mismatched account data length");
+                data_boxes.push(data_vec.into_boxed_slice());
+            }
+
+            // ---- instruction data ----
+            let instr_len: usize = $crate::zkvm::sp1::io::read::<u64>() as usize;
+            let instr_data: Vec<u8> = {
+                let v = $crate::zkvm::sp1::io::read_vec();
+                assert_eq!(v.len(), instr_len, "mismatched instruction data length");
+                v
+            };
+
+            // ---- program_id ----
+            let pid_bytes: [u8; 32] = $crate::zkvm::sp1::io::read();
+            let program_id = $crate::zkvm::pubkey::Pubkey::new_from_array(pid_bytes);
+
+            // Second pass: build AccountInfo
+            let mut accounts: Vec<$crate::zkvm::account_info::AccountInfo> =
+                Vec::with_capacity(acct_count);
+            for (i, (lam_box, data_box)) in lamports_boxes
+                .iter_mut()
+                .zip(data_boxes.iter_mut())
+                .enumerate()
+            {
+                let lamports_cell: ::std::rc::Rc<::std::cell::RefCell<&mut u64>> =
+                    ::std::rc::Rc::new(::std::cell::RefCell::new(&mut **lam_box));
+                let data_cell: ::std::rc::Rc<::std::cell::RefCell<&mut [u8]>> = ::std::rc::Rc::new(::std::cell::RefCell::new(&mut **data_box));
+                #[allow(deprecated)]
+                let info = $crate::zkvm::account_info::AccountInfo {
+                    key: &account_keys[i],
+                    is_signer: is_signer_flags[i],
+                    is_writable: is_writable_flags[i],
+                    lamports: lamports_cell,
+                    data: data_cell,
+                    owner: &account_owners[i],
+                    executable: is_exec_flags[i],
+                    _unused: Default::default(),
+                };
+                accounts.push(info);
+            }
+
+            // call the user handler and commit exit code
+            let result = $process_instruction(&program_id, &accounts, &instr_data);
+            let exit_code: u32 = if result.is_ok() { 0 } else { 1 };
+            $crate::zkvm::sp1::io::commit(&exit_code);
+        }
     };
 }
 
