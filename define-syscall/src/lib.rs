@@ -27,15 +27,20 @@ macro_rules! define_syscall {
 #[cfg(not(target_feature = "static-syscalls"))]
 #[macro_export]
 macro_rules! define_syscall {
-    (fn $name:ident($($arg:ident: $typ:ty),*) -> $ret:ty) => {
+    (fn $name:ident($($arg:ident: $typ:ty),*) -> $ret:ty $body:block) => {
+        #[cfg(target_os = "zkvm")]
+        pub fn $name($($arg: $typ),*) -> $ret $body
+
+        #[cfg(not(target_os = "zkvm"))]
         extern "C" {
             pub fn $name($($arg: $typ),*) -> $ret;
         }
     };
-    (fn $name:ident($($arg:ident: $typ:ty),*)) => {
-        define_syscall!(fn $name($($arg: $typ),*) -> ());
-    }
+    (fn $name:ident($($arg:ident: $typ:ty),*) $body:block) => {
+        define_syscall!(fn $name($($arg: $typ),*) -> () $body);
+    };
 }
+
 
 #[cfg(target_feature = "static-syscalls")]
 pub const fn sys_hash(name: &str) -> usize {
