@@ -4,4 +4,4 @@ pub use solana_define_syscall::definitions::{
 };
 use {solana_define_syscall::define_syscall, solana_pubkey::Pubkey};
 
-define_syscall!(fn sol_get_return_data(data: *mut u8, length: u64, program_id: *mut Pubkey) -> u64);
+define_syscall!(fn sol_get_return_data(data: *mut u8, length: u64, program_id: *mut Pubkey) -> u64 { 0 });

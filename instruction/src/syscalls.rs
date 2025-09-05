@@ -8,7 +8,7 @@ pub use {
 };
 
 #[cfg(any(target_os = "solana", target_os = "zkvm"))]
-define_syscall!(fn sol_get_processed_sibling_instruction(index: u64, meta: *mut ProcessedSiblingInstruction, program_id: *mut Pubkey, data: *mut u8, accounts: *mut AccountMeta) -> u64);
+define_syscall!(fn sol_get_processed_sibling_instruction(index: u64, meta: *mut ProcessedSiblingInstruction, program_id: *mut Pubkey, data: *mut u8, accounts: *mut AccountMeta) -> u64 { 0 });
 
 /// Returns a sibling instruction from the processed sibling instruction list.
 ///
