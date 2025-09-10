@@ -19,7 +19,7 @@ pub mod syscalls;
 use crate::error::AddressError;
 #[cfg(feature = "decode")]
 use crate::error::ParseAddressError;
-#[cfg(all(feature = "rand", not(target_os = "solana")))]
+#[cfg(all(feature = "rand", not(any(target_os = "solana", target_os = "zkvm"))))]
 pub use crate::hasher::{AddressHasher, AddressHasherBuilder};
 
 #[cfg(feature = "std")]
@@ -160,13 +160,13 @@ impl TryFrom<&str> for Address {
     }
 }
 
-// If target_os = "solana", then this panics so there are no dependencies.
+// If any(target_os = "solana", target_os = "zkvm"), then this panics so there are no dependencies.
 // When target_os != "solana", this should be opt-in so users
 // don't need the curve25519 dependency.
-#[cfg(any(target_os = "solana", feature = "curve25519"))]
+#[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
 #[allow(clippy::used_underscore_binding)]
 pub fn bytes_are_curve_point<T: AsRef<[u8]>>(_bytes: T) -> bool {
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     {
         let Ok(compressed_edwards_y) =
             curve25519_dalek::edwards::CompressedEdwardsY::from_slice(_bytes.as_ref())
@@ -175,7 +175,7 @@ pub fn bytes_are_curve_point<T: AsRef<[u8]>>(_bytes: T) -> bool {
         };
         compressed_edwards_y.decompress().is_some()
     }
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     unimplemented!();
 }
 
@@ -228,7 +228,7 @@ impl Address {
         Self::from(b)
     }
 
-    // If target_os = "solana", then the solana_sha256_hasher crate will use
+    // If any(target_os = "solana", target_os = "zkvm"), then the solana_sha256_hasher crate will use
     // syscalls which bring no dependencies.
     // When target_os != "solana", this should be opt-in so users
     // don't need the sha2 dependency.
@@ -263,10 +263,10 @@ impl Address {
         &self.0
     }
 
-    // If target_os = "solana", then this panics so there are no dependencies.
+    // If any(target_os = "solana", target_os = "zkvm"), then this panics so there are no dependencies.
     // When target_os != "solana", this should be opt-in so users
     // don't need the curve25519 dependency.
-    #[cfg(any(target_os = "solana", feature = "curve25519"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
     pub fn is_on_curve(&self) -> bool {
         bytes_are_curve_point(self)
     }

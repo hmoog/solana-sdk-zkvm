@@ -20,3 +20,6 @@ solana-define-syscall = { workspace = true }
 solana-msg = { workspace = true }
 solana-program-error = { workspace = true }
 solana-pubkey = { workspace = true, default-features = false }
+
+[target.'cfg(target_os = "zkvm")'.dependencies]
+sp1-zkvm = "5.2.1"

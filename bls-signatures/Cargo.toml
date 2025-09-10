@@ -38,7 +38,7 @@ solana-frozen-abi-macro = { workspace = true, optional = true, features = [
 ] }
 thiserror = { workspace = true }
 
-[target.'cfg(not(target_os = "solana"))'.dependencies]
+[target.'cfg(not(any(target_os = "solana", target_os = "zkvm")))'.dependencies]
 blst = { workspace = true }
 blstrs = { workspace = true }
 ff = { workspace = true }

@@ -13,10 +13,10 @@ pub use {
 pub mod instructions {
     #[deprecated(since = "2.2.0", note = "Use solana-instruction crate instead")]
     pub use solana_instruction::{BorrowedAccountMeta, BorrowedInstruction};
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     #[deprecated(since = "2.2.0", note = "Use solana-instructions-sysvar crate instead")]
     pub use solana_instructions_sysvar::construct_instructions_data;
-    #[cfg(all(not(target_os = "solana"), feature = "dev-context-only-utils"))]
+    #[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "dev-context-only-utils"))]
     #[deprecated(since = "2.2.0", note = "Use solana-instructions-sysvar crate instead")]
     pub use solana_instructions_sysvar::serialize_instructions;
     #[cfg(feature = "dev-context-only-utils")]

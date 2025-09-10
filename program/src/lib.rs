@@ -118,7 +118,7 @@
 //! and off-chain execution, the environments of which are significantly
 //! different, it extensively uses [conditional compilation][cc] to tailor its
 //! implementation to the environment. The `cfg` predicate used for identifying
-//! compilation for on-chain programs is `target_os = "solana"`, as in this
+//! compilation for on-chain programs is `any(target_os = "solana", target_os = "zkvm")`, as in this
 //! example from the `solana-program` codebase that logs a message via a
 //! syscall when run on-chain, and via a library call when offchain:
 //!
@@ -128,12 +128,12 @@
 //!
 //! ```
 //! pub fn sol_log(message: &str) {
-//!     #[cfg(target_os = "solana")]
+//!     #[cfg(any(target_os = "solana", target_os = "zkvm"))]
 //!     unsafe {
 //!         sol_log_(message.as_ptr(), message.len() as u64);
 //!     }
 //!
-//!     #[cfg(not(target_os = "solana"))]
+//!     #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 //!     program_stubs::sol_log(message);
 //! }
 //! # mod program_stubs {
@@ -519,7 +519,7 @@ pub use solana_serialize_utils as serialize_utils;
 pub use solana_short_vec as short_vec;
 #[deprecated(since = "2.1.0", note = "Use `solana-stable-layout` crate instead")]
 pub use solana_stable_layout as stable_layout;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub use solana_sysvar::program_stubs;
 pub use {
     solana_account_info::{self as account_info, debug_account_data},
@@ -670,7 +670,7 @@ macro_rules! unchecked_div_by_const {
 // rustdoc fails to generate documentation for the re-exports within
 // `solana_sdk`.
 #[deprecated(since = "2.2.0", note = "Use solana-example-mocks instead")]
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub use solana_example_mocks as example_mocks;
 
 #[cfg(test)]

@@ -34,7 +34,7 @@ macro_rules! impl_from_str {
 /// * `$point_type`: The underlying `blstrs` affine point type (e.g., `G1Affine` or `G2Affine`).
 /// * `$as_projective_trait`: The identifier for the custom projective conversion trait (e.g.,`AsPubkeyProjective`).
 /// * `$as_affine_trait`: The identifier for the custom affine conversion trait (e.g., `AsPubkey`).
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 macro_rules! impl_bls_conversions {
     (
         $projective:ident,

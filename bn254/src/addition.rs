@@ -15,7 +15,7 @@ pub(crate) mod consts {
     pub const ALT_BN128_SUB_LE: u64 = ALT_BN128_SUB | LE_FLAG;
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub(crate) mod target_arch {
     use {
         super::{consts::*, PodG1},
@@ -90,7 +90,7 @@ pub(crate) mod target_arch {
     }
 }
 
-#[cfg(target_os = "solana")]
+#[cfg(any(target_os = "solana", target_os = "zkvm"))]
 pub(crate) mod target_arch {
     use {super::consts, crate::AltBn128Error, solana_define_syscall::definitions as syscalls};
 

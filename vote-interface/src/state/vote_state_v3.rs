@@ -116,7 +116,7 @@ impl VoteStateV3 {
         self.authorized_voters.is_empty()
     }
 
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize(input: &[u8]) -> Result<Self, InstructionError> {
         let mut vote_state = Self::default();
         Self::deserialize_into(input, &mut vote_state)?;
@@ -130,7 +130,7 @@ impl VoteStateV3 {
     ///
     /// On success, `vote_state` reflects the state of the input data. On failure, `vote_state` is
     /// reset to `VoteStateV3::default()`.
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize_into(
         input: &[u8],
         vote_state: &mut VoteStateV3,
@@ -150,7 +150,7 @@ impl VoteStateV3 {
     /// [`MaybeUninit::assume_init`](https://doc.rust-lang.org/std/mem/union.MaybeUninit.html#method.assume_init).
     /// On failure, `vote_state` may still be uninitialized and must not be
     /// converted to `VoteStateV3`.
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize_into_uninit(
         input: &[u8],
         vote_state: &mut std::mem::MaybeUninit<VoteStateV3>,
@@ -158,7 +158,7 @@ impl VoteStateV3 {
         VoteStateV3::deserialize_into_ptr(input, vote_state.as_mut_ptr())
     }
 
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     fn deserialize_into_ptr(
         input: &[u8],
         vote_state: *mut VoteStateV3,
@@ -172,7 +172,7 @@ impl VoteStateV3 {
             // V0_23_5. not supported for bpf targets; these should not exist on mainnet
             // supported for non-bpf targets for backwards compatibility
             0 => {
-                #[cfg(not(target_os = "solana"))]
+                #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
                 {
                     // Safety: vote_state is valid as it comes from `&mut MaybeUninit<VoteStateV3>` or
                     // `&mut VoteStateV3`. In the first case, the value is uninitialized so we write()
@@ -188,7 +188,7 @@ impl VoteStateV3 {
                     }
                     Ok(())
                 }
-                #[cfg(target_os = "solana")]
+                #[cfg(any(target_os = "solana", target_os = "zkvm"))]
                 Err(InstructionError::InvalidAccountData)
             }
             // V1_14_11. substantially different layout and data from V0_23_5

@@ -37,20 +37,20 @@ macro_rules! msg {
     ($($arg:tt)*) => ($crate::sol_log(&format!($($arg)*)));
 }
 
-#[cfg(target_os = "solana")]
+#[cfg(any(target_os = "solana", target_os = "zkvm"))]
 pub mod syscalls;
 
 /// Print a string to the log.
 #[inline]
 pub fn sol_log(message: &str) {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     unsafe {
         syscalls::sol_log_(message.as_ptr(), message.len() as u64);
     }
 
-    #[cfg(all(not(target_os = "solana"), feature = "std"))]
+    #[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "std"))]
     std::println!("{message}");
 
-    #[cfg(all(not(target_os = "solana"), not(feature = "std")))]
+    #[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), not(feature = "std")))]
     core::hint::black_box(message);
 }

@@ -1,9 +1,9 @@
-#[cfg(all(not(target_os = "solana"), feature = "curve25519"))]
+#[cfg(all(not(any(target_os = "solana", target_os = "zkvm")), feature = "curve25519"))]
 use crate::bytes_are_curve_point;
-#[cfg(any(target_os = "solana", feature = "curve25519"))]
+#[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
 use crate::error::AddressError;
 use crate::Address;
-#[cfg(target_os = "solana")]
+#[cfg(any(target_os = "solana", target_os = "zkvm"))]
 /// Syscall definitions used by `solana_address`.
 pub use solana_define_syscall::definitions::{
     sol_create_program_address, sol_log_pubkey, sol_try_find_program_address,
@@ -11,19 +11,19 @@ pub use solana_define_syscall::definitions::{
 
 /// Copied from `solana_program::entrypoint::SUCCESS`
 /// to avoid a `solana_program` dependency
-#[cfg(target_os = "solana")]
+#[cfg(any(target_os = "solana", target_os = "zkvm"))]
 const SUCCESS: u64 = 0;
 
 impl Address {
-    #[cfg(any(target_os = "solana", feature = "std"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "std"))]
     /// Log a `Address` from a program
     pub fn log(&self) {
-        #[cfg(target_os = "solana")]
+        #[cfg(any(target_os = "solana", target_os = "zkvm"))]
         unsafe {
             sol_log_pubkey(self.as_ref() as *const _ as *const u8)
         };
 
-        #[cfg(not(target_os = "solana"))]
+        #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
         std::println!("{}", std::string::ToString::to_string(&self));
     }
 
@@ -271,11 +271,11 @@ impl Address {
     /// #
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    // If target_os = "solana", then the function will use
+    // If any(target_os = "solana", target_os = "zkvm"), then the function will use
     // syscalls which bring no dependencies.
     // When target_os != "solana", this should be opt-in so users
     // don't need the curve25519 dependency.
-    #[cfg(any(target_os = "solana", feature = "curve25519"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
     pub fn find_program_address(seeds: &[&[u8]], program_id: &Address) -> (Address, u8) {
         Self::try_find_program_address(seeds, program_id)
             .unwrap_or_else(|| panic!("Unable to find a viable program address bump seed"))
@@ -293,11 +293,11 @@ impl Address {
     /// See the documentation for [`find_program_address`] for a full description.
     ///
     /// [`find_program_address`]: Address::find_program_address
-    // If target_os = "solana", then the function will use
+    // If any(target_os = "solana", target_os = "zkvm"), then the function will use
     // syscalls which bring no dependencies.
     // When target_os != "solana", this should be opt-in so users
     // don't need the curve25519 dependency.
-    #[cfg(any(target_os = "solana", feature = "curve25519"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
     #[allow(clippy::same_item_push)]
     pub fn try_find_program_address(
         seeds: &[&[u8]],
@@ -305,7 +305,7 @@ impl Address {
     ) -> Option<(Address, u8)> {
         // Perform the calculation inline, calling this from within a program is
         // not supported
-        #[cfg(not(target_os = "solana"))]
+        #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
         {
             let mut bump_seed = [u8::MAX];
             for _ in 0..u8::MAX {
@@ -323,7 +323,7 @@ impl Address {
             None
         }
         // Call via a system call to perform the calculation
-        #[cfg(target_os = "solana")]
+        #[cfg(any(target_os = "solana", target_os = "zkvm"))]
         {
             let mut bytes = [0; 32];
             let mut bump_seed = u8::MAX;
@@ -385,11 +385,11 @@ impl Address {
     /// assert_eq!(expected_pda, actual_pda);
     /// # Ok::<(), anyhow::Error>(())
     /// ```
-    // If target_os = "solana", then the function will use
+    // If any(target_os = "solana", target_os = "zkvm"), then the function will use
     // syscalls which bring no dependencies.
     // When target_os != "solana", this should be opt-in so users
     // don't need the curve225519 dep.
-    #[cfg(any(target_os = "solana", feature = "curve25519"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "curve25519"))]
     pub fn create_program_address(
         seeds: &[&[u8]],
         program_id: &Address,
@@ -409,7 +409,7 @@ impl Address {
 
         // Perform the calculation inline, calling this from within a program is
         // not supported
-        #[cfg(not(target_os = "solana"))]
+        #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
         {
             use crate::PDA_MARKER;
 
@@ -427,7 +427,7 @@ impl Address {
             Ok(Address::from(hash.to_bytes()))
         }
         // Call via a system call to perform the calculation
-        #[cfg(target_os = "solana")]
+        #[cfg(any(target_os = "solana", target_os = "zkvm"))]
         {
             let mut bytes = [0; 32];
             let result = unsafe {

@@ -38,7 +38,7 @@ extern crate self as solana_sdk;
 pub use solana_message as message;
 #[cfg(feature = "borsh")]
 pub use solana_program::borsh1;
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub use solana_program::program_stubs;
 pub use solana_program::{
     account_info, big_mod_exp, blake3, bpf_loader, bpf_loader_deprecated, clock, config,

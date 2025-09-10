@@ -8,7 +8,7 @@ use serde_derive::{Deserialize, Serialize};
 use serde_with::serde_as;
 #[cfg(feature = "frozen-abi")]
 use solana_frozen_abi_macro::{frozen_abi, AbiExample};
-#[cfg(any(target_os = "solana", feature = "bincode"))]
+#[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
 use solana_instruction::error::InstructionError;
 use {
     super::{BlockTimestamp, LandedVote, BLS_PUBLIC_KEY_COMPRESSED_SIZE},
@@ -77,7 +77,7 @@ impl VoteStateV4 {
         3762 // Same size as V3 to avoid account resizing
     }
 
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize(input: &[u8], vote_pubkey: &Pubkey) -> Result<Self, InstructionError> {
         let mut vote_state = Self::default();
         Self::deserialize_into(input, &mut vote_state, vote_pubkey)?;
@@ -91,7 +91,7 @@ impl VoteStateV4 {
     ///
     /// On success, `vote_state` reflects the state of the input data. On failure, `vote_state` is
     /// reset to `VoteStateV4::default()`.
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize_into(
         input: &[u8],
         vote_state: &mut VoteStateV4,
@@ -114,7 +114,7 @@ impl VoteStateV4 {
     /// [`MaybeUninit::assume_init`](https://doc.rust-lang.org/std/mem/union.MaybeUninit.html#method.assume_init).
     /// On failure, `vote_state` may still be uninitialized and must not be
     /// converted to `VoteStateV4`.
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     pub fn deserialize_into_uninit(
         input: &[u8],
         vote_state: &mut std::mem::MaybeUninit<VoteStateV4>,
@@ -123,7 +123,7 @@ impl VoteStateV4 {
         Self::deserialize_into_ptr(input, vote_state.as_mut_ptr(), vote_pubkey)
     }
 
-    #[cfg(any(target_os = "solana", feature = "bincode"))]
+    #[cfg(any(any(target_os = "solana", target_os = "zkvm"), feature = "bincode"))]
     fn deserialize_into_ptr(
         input: &[u8],
         vote_state: *mut VoteStateV4,
@@ -139,7 +139,7 @@ impl VoteStateV4 {
             // supported for non-bpf targets for backwards compatibility.
             // **Same pattern as v3 for this variant**.
             0 => {
-                #[cfg(not(target_os = "solana"))]
+                #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
                 {
                     // Safety: vote_state is valid as it comes from `&mut MaybeUninit<VoteStateV4>` or
                     // `&mut VoteStateV4`. In the first case, the value is uninitialized so we write()
@@ -155,7 +155,7 @@ impl VoteStateV4 {
                     }
                     Ok(())
                 }
-                #[cfg(target_os = "solana")]
+                #[cfg(any(target_os = "solana", target_os = "zkvm"))]
                 Err(InstructionError::InvalidAccountData)
             }
             // V1_14_11

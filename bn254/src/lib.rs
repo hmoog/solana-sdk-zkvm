@@ -114,7 +114,7 @@ const G2_POINT_SIZE: usize = FIELD_SIZE * 4;
 #[repr(transparent)]
 pub struct PodG2(pub [u8; G2_POINT_SIZE]);
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 mod target_arch {
     use {
         super::*,

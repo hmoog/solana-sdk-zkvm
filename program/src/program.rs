@@ -87,12 +87,12 @@ pub fn invoke_signed_unchecked(
     account_infos: &[AccountInfo],
     signers_seeds: &[&[&[u8]]],
 ) -> ProgramResult {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         solana_cpi::invoke_signed_unchecked(instruction, account_infos, signers_seeds)
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_invoke_signed(instruction, account_infos, signers_seeds)
 }
 
@@ -101,12 +101,12 @@ pub fn invoke_signed_unchecked(
 ///
 /// [`solana_cpi::set_return_data`]: https://docs.rs/solana-cpi/latest/solana_cpi/fn.set_return_data.html
 pub fn set_return_data(data: &[u8]) {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         solana_cpi::set_return_data(data);
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_set_return_data(data)
 }
 
@@ -115,12 +115,12 @@ pub fn set_return_data(data: &[u8]) {
 ///
 /// [`solana_cpi::get_return_data`]: https://docs.rs/solana-cpi/latest/solana_cpi/fn.get_return_data.html
 pub fn get_return_data() -> Option<(Pubkey, Vec<u8>)> {
-    #[cfg(target_os = "solana")]
+    #[cfg(any(target_os = "solana", target_os = "zkvm"))]
     {
         solana_cpi::get_return_data()
     }
 
-    #[cfg(not(target_os = "solana"))]
+    #[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
     crate::program_stubs::sol_get_return_data()
 }
 

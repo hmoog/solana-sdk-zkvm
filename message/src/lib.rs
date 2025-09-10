@@ -49,7 +49,7 @@ use serde_derive::{Deserialize, Serialize};
 #[cfg(feature = "frozen-abi")]
 use solana_frozen_abi_macro::AbiExample;
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[path = ""]
 mod non_bpf_modules {
     mod account_keys;
@@ -60,7 +60,7 @@ mod non_bpf_modules {
     pub use {account_keys::*, address_loader::*, sanitized::*, versions::*};
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub use non_bpf_modules::*;
 pub use {
     compiled_keys::CompileError,

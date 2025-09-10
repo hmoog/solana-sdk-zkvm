@@ -33,7 +33,7 @@
 #[cfg(feature = "dev-context-only-utils")]
 use qualifier_attr::qualifiers;
 pub use solana_sdk_ids::sysvar::instructions::{check_id, id, ID};
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 use {
     bitflags::bitflags,
     solana_instruction::BorrowedInstruction,
@@ -65,7 +65,7 @@ solana_sysvar_id::impl_sysvar_id!(Instructions);
 /// Construct the account data for the instructions sysvar.
 ///
 /// This function is used by the runtime and not available to Solana programs.
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 pub fn construct_instructions_data(instructions: &[BorrowedInstruction]) -> Vec<u8> {
     let mut data = serialize_instructions(instructions);
     // add room for current instruction index.
@@ -74,7 +74,7 @@ pub fn construct_instructions_data(instructions: &[BorrowedInstruction]) -> Vec<
     data
 }
 
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 bitflags! {
     struct InstructionsSysvarAccountMeta: u8 {
         const IS_SIGNER = 0b00000001;
@@ -106,7 +106,7 @@ bitflags! {
 // - N = num_instructions
 // - A = number of accounts in a particular instruction
 // - D = data_len
-#[cfg(not(target_os = "solana"))]
+#[cfg(not(any(target_os = "solana", target_os = "zkvm")))]
 #[cfg_attr(feature = "dev-context-only-utils", qualifiers(pub))]
 fn serialize_instructions(instructions: &[BorrowedInstruction]) -> Vec<u8> {
     // 64 bytes is a reasonable guess, calculating exactly is slower in benchmarks
